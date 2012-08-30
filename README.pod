@@ -89,7 +89,8 @@ A MongoDB::Database object to hold the queue.  Required.
 
 =head2 name
 
-A collection name for the queue.  Defaults to 'queue'.
+A collection name for the queue.  Defaults to 'queue'.  The collection must
+only be used by MongoDBx::Queue or unpredictable awful things will happen.
 
 =head2 safe
 
@@ -97,6 +98,13 @@ Boolean that controls whether 'safe' inserts/updates are done.
 Defaults to true.
 
 =head1 METHODS
+
+=head2 new
+
+  my $queue = MongoDBx::Queue->new( db => $database, @options );
+
+Creates and returns a new queue object.  The C<db> argument is required.
+Other attributes may be provided as well.
 
 =head2 add_task
 
@@ -124,9 +132,9 @@ Tasks are returned in insertion time order with a resolution of one second.
   $queue->reschedule_task( $task, $when );
 
 Releases the reservation on a task.  If there is no second argument, the
-task keeps its original priority.  If a second argument is provided, the
-insertion time for the task is updated.  The schedule is ordered by epoch
-seconds, so an arbitrary past or future time can be set and affect subsequent
+task keeps its original priority.  If a second argument is provided, it
+sets a new insertion time for the task.  The schedule is ordered by epoch
+seconds, so an arbitrary past or future time can be set and affects subsequent
 reservation order.
 
 =head2 remove_task
@@ -163,7 +171,7 @@ Returns the number of tasks in the queue that have not been reserved.
 =head2 Bugs / Feature Requests
 
 Please report any bugs or feature requests through the issue tracker
-at L<https://rt.cpan.org/Public/Dist/Display.html?Name=MongoDBx-Queue>.
+at L<https://github.com/dagolden/mongodbx-queue/issues>.
 You will be notified automatically of any progress on your issue.
 
 =head2 Source Code

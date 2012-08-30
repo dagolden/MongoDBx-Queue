@@ -9,11 +9,19 @@ package MongoDBx::Queue;
 
 use Any::Moose;
 use Const::Fast qw/const/;
+use MongoDB 0.45 ();
 use boolean;
 
 const my $ID        => '_id';
 const my $RESERVED  => '_r';
 const my $SCHEDULED => '_s';
+
+=method new
+
+  my $queue = MongoDBx::Queue->new( db => $database, @options );
+
+Creates and returns a new queue object.  The C<db> argument is required.
+Other attributes may be provided as well.
 
 =attr db
 
@@ -29,7 +37,8 @@ has db => (
 
 =attr name
 
-A collection name for the queue.  Defaults to 'queue'.
+A collection name for the queue.  Defaults to 'queue'.  The collection must
+only be used by MongoDBx::Queue or unpredictable awful things will happen.
 
 =cut
 
@@ -134,9 +143,9 @@ sub reserve_task {
   $queue->reschedule_task( $task, $when );
 
 Releases the reservation on a task.  If there is no second argument, the
-task keeps its original priority.  If a second argument is provided, the
-insertion time for the task is updated.  The schedule is ordered by epoch
-seconds, so an arbitrary past or future time can be set and affect subsequent
+task keeps its original priority.  If a second argument is provided, it
+sets a new insertion time for the task.  The schedule is ordered by epoch
+seconds, so an arbitrary past or future time can be set and affects subsequent
 reservation order.
 
 =cut
