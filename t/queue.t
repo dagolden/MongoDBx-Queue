@@ -19,17 +19,60 @@ $queue = new_ok( 'MongoDBx::Queue', [ db => $db, name => 'queue_t' ] );
 
 ok( $queue->add_task( { msg => "Hello World" } ), "added a task" );
 
-$task = $queue->reserve_task;
+ok( $task = $queue->reserve_task, "reserved a task" );
 
-ok( $task, "reserved a task" );
-
-is( $task->{msg}, "Hello World", "Task has correct data" )
+is( $task->{msg}, "Hello World", "task has correct data" )
   or diag explain $task;
 
 $task2 = $queue->reserve_task;
 
-ok( ! defined $task2, "Another reserve finds nothing" )
+ok( ! defined $task2, "another reserve finds nothing" )
   or diag explain $task2;
+
+is( $queue->size, 1, "size() shows 1" );
+
+is( $queue->waiting, 0, "waiting() shows 0" );
+
+sleep 2; # let task timeout
+
+ok( $queue->apply_timeout( 1 ), "applied timeout to pending tasks" );
+
+is( $queue->waiting, 1, "waiting() shows 1" );
+
+ok( $queue->add_task( { msg => "Goodbye World" } ), "added another task" );
+
+is( $queue->waiting, 2, "waiting() shows 2" );
+
+ok( $task = $queue->reserve_task, "reserved a task" );
+
+is( $queue->waiting, 1, "waiting() shows 1" );
+
+is( $task->{msg}, "Hello World", "got first task, not second task" )
+  or diag explain $task;
+
+ok( $queue->reschedule_task( $task ), "rescheduled task without setting time" );
+
+is( $queue->waiting, 2, "waiting() shows 2" );
+
+ok( $task = $queue->reserve_task, "reserved a task" );
+
+is( $task->{msg}, "Hello World", "got first task" )
+  or diag explain $task;
+
+ok( $queue->reschedule_task( $task, time() + 10 ), "rescheduled task for later" );
+
+ok( $task = $queue->reserve_task, "reserved a task" );
+
+is( $task->{msg}, "Goodbye World", "got second task" )
+  or diag explain $task;
+
+ok( $queue->remove_task( $task ), "removed task" );
+
+ok( $task = $queue->reserve_task, "reserved a task" );
+
+ok( $queue->remove_task( $task ), "removed task" );
+
+is( $queue->size, 0, "size() shows 0" );
 
 done_testing;
 

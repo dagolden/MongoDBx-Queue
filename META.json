@@ -1,0 +1,73 @@
+{
+   "abstract" : "A work queue implemented with MongoDB",
+   "author" : [
+      "David Golden <dagolden@cpan.org>"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "Dist::Zilla version 4.300021, CPAN::Meta::Converter version 2.120921",
+   "license" : [
+      "apache_2_0"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "MongoDBx-Queue",
+   "no_index" : {
+      "directory" : [
+         "t",
+         "xt",
+         "examples",
+         "corpus"
+      ],
+      "package" : [
+         "DB"
+      ]
+   },
+   "prereqs" : {
+      "configure" : {
+         "requires" : {
+            "ExtUtils::MakeMaker" : "6.30"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "Any::Moose" : "0",
+            "Const::Fast" : "0",
+            "boolean" : "0",
+            "perl" : "5.010",
+            "strict" : "0",
+            "warnings" : "0"
+         }
+      },
+      "test" : {
+         "requires" : {
+            "File::Find" : "0",
+            "File::Temp" : "0",
+            "MongoDB" : "0.45",
+            "Test::More" : "0.96"
+         }
+      }
+   },
+   "provides" : {
+      "MongoDBx::Queue" : {
+         "file" : "lib/MongoDBx/Queue.pm",
+         "version" : "0.001"
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "bugtracker" : {
+         "mailto" : "bug-MongoDBx-Queue@rt.cpan.org",
+         "web" : "https://rt.cpan.org/Public/Dist/Display.html?Name=MongoDBx-Queue"
+      },
+      "homepage" : "https://metacpan.org/release/MongoDBx-Queue",
+      "repository" : {
+         "type" : "git",
+         "url" : "git://github.com/dagolden/mongodbx-queue.git",
+         "web" : "https://github.com/dagolden/mongodbx-queue"
+      }
+   },
+   "version" : "0.001"
+}
+
