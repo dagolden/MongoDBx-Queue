@@ -15,7 +15,7 @@ $coll->drop;
 
 my ( $queue, $task, $task2 );
 
-$queue = new_ok( 'MongoDBx::Queue', [ db => $db, name => 'queue_t' ] );
+$queue = new_ok( 'MongoDBx::Queue', [ { db => $db, name => 'queue_t' } ] );
 
 ok( $queue->add_task( { msg => "Hello World" } ), "added a task" );
 
@@ -61,14 +61,34 @@ is( $task->{msg}, "Hello World", "got first task" )
 
 ok( $queue->reschedule_task( $task, time() + 10 ), "rescheduled task for later" );
 
-ok( $task = $queue->reserve_task, "reserved a task" );
+ok( $task = $queue->reserve_task( { max_priority => time() + 100 } ),
+  "reserved a task"
+);
 
 is( $task->{msg}, "Goodbye World", "got second task" )
   or diag explain $task;
 
 ok( $queue->remove_task( $task ), "removed task" );
 
-ok( $task = $queue->reserve_task, "reserved a task" );
+ok( $task = $queue->reserve_task( { max_priority => time() + 100 } ),
+  "reserved a task"
+);
+
+ok( $queue->remove_task( $task ), "removed task" );
+
+is( $queue->size, 0, "size() shows 0" );
+
+ok( $queue->add_task( { msg => "Save for later" }, { priority => time() + 100 }  ),
+  "added another task scheduled for future"
+);
+
+ok( ! ($task = $queue->reserve_task), "reserve_task() doesn't see future task" );
+
+ok( $task = $queue->reserve_task( { max_priority => time() + 1000 } ),
+    "reserve_task( {max_priority => \$future} ) retrieves future task"
+);
+
+ok( $queue->remove_task( $task ), "removed task" );
 
 ok( $queue->remove_task( $task ), "removed task" );
 
