@@ -2,6 +2,8 @@ Revision history for MongoDBx-Queue
 
 {{$NEXT}}
 
+0.002     2012-09-05 18:08:14 America/New_York
+
   [INCOMPATIBLE CHANGES]
 
   - reschedule_task() now takes a hashref of options using the same format
