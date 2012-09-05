@@ -163,24 +163,29 @@ sub reserve_task {
 =method reschedule_task
 
   $queue->reschedule_task( $task );
-  $queue->reschedule_task( $task, time() );
-  $queue->reschedule_task( $task, $when );
+  $queue->reschedule_task( $task, \%options );
 
-Releases the reservation on a task.  If there is no second argument, the
-task keeps its original priority.  If a second argument is provided, it
-sets a new insertion time for the task.  The schedule is ordered by epoch
-seconds, so an arbitrary past or future time can be set and affects subsequent
-reservation order.
+Releases the reservation on a task so it can be reserved again.
+
+The C<\%options> hash reference is optional and may contain the following key:
+
+=for :list
+* C<priority>: sets the priority for the task. Defaults to the task's original priority.
+
+Note that setting a "future" priority may cause a task to be invisible
+to C<reserve_task>.  See that method for more details.
 
 =cut
 
 sub reschedule_task {
-  my ( $self, $task, $epochsecs ) = @_;
-  $epochsecs //= $task->{$PRIORITY}; # default to original time
+  my ( $self, $task, $opts ) = @_;
   $self->_coll->update(
     { $ID => $task->{$ID} },
-    { '$unset' => { $RESERVED => 0 }, '$set' => { $PRIORITY => $epochsecs } },
-    { safe     => $self->safe }
+    {
+      '$unset'  => { $RESERVED => 0 },
+      '$set'    => { $PRIORITY => $opts->{priority} // $task->{$PRIORITY} },
+    },
+    { safe => $self->safe }
   );
 }
 

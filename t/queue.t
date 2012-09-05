@@ -59,7 +59,7 @@ ok( $task = $queue->reserve_task, "reserved a task" );
 is( $task->{msg}, "Hello World", "got first task" )
   or diag explain $task;
 
-ok( $queue->reschedule_task( $task, time() + 10 ), "rescheduled task for later" );
+ok( $queue->reschedule_task( $task, { priority => time() + 10 } ), "rescheduled task for later" );
 
 ok( $task = $queue->reserve_task( { max_priority => time() + 100 } ),
   "reserved a task"

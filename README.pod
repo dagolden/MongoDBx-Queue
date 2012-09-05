@@ -2,11 +2,11 @@
 
 =head1 NAME
 
-MongoDBx::Queue - A work queue implemented with MongoDB
+MongoDBx::Queue - A message queue implemented with MongoDB
 
 =head1 VERSION
 
-version 0.001
+version 0.002
 
 =head1 SYNOPSIS
 
@@ -17,7 +17,7 @@ version 0.001
   my $connection = MongoDB::Connection->new( @parameters );
   my $database = $connection->get_database("queue_db");
 
-  my $queue = MongoDBx::Queue->new( db => $database );
+  my $queue = MongoDBx::Queue->new( { db => $database } );
 
   $queue->add_task( { msg => "Hello World" } );
   $queue->add_task( { msg => "Goodbye World" } );
@@ -32,11 +32,14 @@ version 0.001
 B<ALPHA> -- this is an early release and is still in development.  Testing
 and feedback welcome.
 
-MongoDBx::Queue implements a simple message queue using MongoDB as a backend.
+MongoDBx::Queue implements a simple, prioritized message queue using MongoDB as
+a backend.  By default, messages are prioritized by insertion time, creating a
+FIFO queue.
 
 On a single host with MongoDB, it provides a zero-configuration message service
 across local applications.  Alternatively, it can use a MongoDB database
-cluster that provides replication and fail-over for an even more durable queue.
+cluster that provides replication and fail-over for an even more durable,
+multi-host message queue.
 
 Features:
 
@@ -44,7 +47,7 @@ Features:
 
 =item *
 
-hash references, not objects
+messages as hash references, not objects
 
 =item *
 
@@ -52,7 +55,15 @@ arbitrary message fields
 
 =item *
 
-stalled tasks can be timed-out
+arbitrary scheduling on insertion
+
+=item *
+
+atomic message reservation
+
+=item *
+
+stalled reservations can be timed-out
 
 =item *
 
@@ -63,10 +74,6 @@ task rescheduling
 Not yet implemented:
 
 =over 4
-
-=item *
-
-arbitrary scheduling on insertion
 
 =item *
 
@@ -101,29 +108,61 @@ Defaults to true.
 
 =head2 new
 
-  my $queue = MongoDBx::Queue->new( db => $database, @options );
+  $queue = MongoDBx::Queue->new( { db => $database, %options } );
 
 Creates and returns a new queue object.  The C<db> argument is required.
 Other attributes may be provided as well.
 
 =head2 add_task
 
-  $queue->add_task( $hashref );
+  $queue->add_task( \%message, \%options );
 
-Adds a task to the queue.  The hash reference will be shallow copied into the
-task.  Keys must not start with underscores, which are reserved for
-MongoDBx::Queue.
+Adds a task to the queue.  The C<\%message> hash reference will be shallow
+copied into the task and not include objects except as described by
+L<MongoDB::DataTypes>.  Top-level keys must not start with underscores, which are
+reserved for MongoDBx::Queue.
+
+The C<\%options> hash reference is optional and may contain the following key:
+
+=over 4
+
+=item *
+
+C<priority>: sets the priority for the task. Defaults to C<time()>.
+
+=back
+
+Note that setting a "future" priority may cause a task to be invisible
+to C<reserve_task>.  See that method for more details.
 
 =head2 reserve_task
 
   $task = $queue->reserve_task;
+  $task = $queue->reserve_task( \%options );
 
 Atomically marks and returns a task.  The task is marked in the queue as
-in-progress so it can not be reserved again unless is is rescheduled or
-timed-out.  The task returned is a hash reference containing the data added in
-C<add_task>, including private keys for use by MongoDBx::Queue.
+"reserved" (in-progress) so it can not be reserved again unless is is
+rescheduled or timed-out.  The task returned is a hash reference containing the
+data added in C<add_task>, including private keys for use by MongoDBx::Queue
+methods.
 
-Tasks are returned in insertion time order with a resolution of one second.
+Tasks are returned in priority order from lowest to highest.  If multiple tasks
+have identical, lowest priorities, their ordering is undefined.  If no tasks
+are available or visible, it will return C<undef>.
+
+The C<\%options> hash reference is optional and may contain the following key:
+
+=over 4
+
+=item *
+
+C<max_priority>: sets the maximum priority for the task. Defaults to C<time()>.
+
+=back
+
+The C<max_priority> option controls whether "future" tasks are visible.  If
+the lowest task priority is greater than the C<max_priority>, this method
+returns C<undef>.
 
 =head2 reschedule_task
 
