@@ -167,14 +167,22 @@ returns C<undef>.
 =head2 reschedule_task
 
   $queue->reschedule_task( $task );
-  $queue->reschedule_task( $task, time() );
-  $queue->reschedule_task( $task, $when );
+  $queue->reschedule_task( $task, \%options );
 
-Releases the reservation on a task.  If there is no second argument, the
-task keeps its original priority.  If a second argument is provided, it
-sets a new insertion time for the task.  The schedule is ordered by epoch
-seconds, so an arbitrary past or future time can be set and affects subsequent
-reservation order.
+Releases the reservation on a task so it can be reserved again.
+
+The C<\%options> hash reference is optional and may contain the following key:
+
+=over 4
+
+=item *
+
+C<priority>: sets the priority for the task. Defaults to the task's original priority.
+
+=back
+
+Note that setting a "future" priority may cause a task to be invisible
+to C<reserve_task>.  See that method for more details.
 
 =head2 remove_task
 

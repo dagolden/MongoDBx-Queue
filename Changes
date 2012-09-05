@@ -2,6 +2,25 @@ Revision history for MongoDBx-Queue
 
 {{$NEXT}}
 
+  [INCOMPATIBLE CHANGES]
+
+  - reschedule_task() now takes a hashref of options using the same format
+    as add_task() instead of taking a scalar epoch seconds time argument
+  
+  [ADDED]
+
+  - add_task() now supports setting arbitrary priority
+
+  [CHANGED]
+
+  - reserve_task() only find tasks up to a maximum priority; defaults to
+    time(); this makes "future" tasks invisible unless a different
+    maximum priority is requested
+
+  - generally improved documentation for consistency describing new
+    features
+
+
 0.001     2012-08-30 17:34:16 America/New_York
 
   - First release
