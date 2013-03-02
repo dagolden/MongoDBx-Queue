@@ -224,6 +224,16 @@ sub apply_timeout {
   );
 }
 
+=method search
+
+=cut
+
+sub search {
+  my ($self) = @_;
+  my $cursor = $self->_coll->query;
+  return $cursor->all;
+}
+
 =method size
 
   $queue->size;
