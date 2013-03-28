@@ -235,8 +235,9 @@ sub search {
     if ( exists $opts->{reserved} ) {
         $query->{$RESERVED} =
           { '$exists' => $opts->{reserved} ? boolean::true : boolean::false };
+        delete $opts->{reserved};
     }
-    my $cursor = $self->_coll->query($query);
+    my $cursor = $self->_coll->query( $query, $opts );
     if ( $opts->{fields} && ref $opts->{fields} ) {
         my $spec =
           ref $opts->{fields} eq 'HASH'

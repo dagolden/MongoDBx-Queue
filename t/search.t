@@ -84,6 +84,9 @@ is( $found[0]{first}, 'John',         "got first field" );
 is( $found[0]{tel},   '555-123-4567', "got next field" );
 is( $found[0]{last},  'Smith',        "got last field" );
 
+@found = $queue->search( { last => "Doe" }, { limit => 1 } );
+is( scalar @found,    1,      "got correct number from search limited to 1 result" );
+
 done_testing;
 
 # COPYRIGHT
