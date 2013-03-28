@@ -94,28 +94,6 @@ ok( $queue->remove_task($task), "removed task" );
 
 is( $queue->size, 0, "size() shows 0" );
 
-#--------------------------------------------------------------------------#
-# searching and peeking
-#--------------------------------------------------------------------------#
-
-my @task_list = (
-    { first => "John", last => "Doe",   tel => "555-456-7890" },
-    { first => "John", last => "Smith", tel => "555-123-4567" },
-    { first => "Jane", last => "Doe",   tel => "555-456-7890" },
-);
-
-for my $t ( @task_list ) {
-    ok( $queue->add_task( $t ), "added a task" );
-}
-
-my $reserved = $queue->reserve_task;
-
-my @found = $queue->search;
-
-is( scalar @found, scalar @task_list, "got correct number from search()" );
-my @got = map { my $h = $_; +{ map {; $_ => $h->{$_} } qw/first last tel/ } } @found;
-cmp_bag( \@got,  \@task_list, "search() got all tasks" )
-    or diag explain \@got;
 
 done_testing;
 

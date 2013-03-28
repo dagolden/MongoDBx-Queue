@@ -229,8 +229,8 @@ sub apply_timeout {
 =cut
 
 sub search {
-  my ($self) = @_;
-  my $cursor = $self->_coll->query;
+  my ($self, $query) = @_;
+  my $cursor = $self->_coll->query( $query );
   return $cursor->all;
 }
 
