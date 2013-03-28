@@ -30,9 +30,9 @@ A MongoDB::Database object to hold the queue.  Required.
 =cut
 
 has db => (
-  is       => 'ro',
-  isa      => 'MongoDB::Database',
-  required => 1,
+    is       => 'ro',
+    isa      => 'MongoDB::Database',
+    required => 1,
 );
 
 =attr name
@@ -43,9 +43,9 @@ only be used by MongoDBx::Queue or unpredictable awful things will happen.
 =cut
 
 has name => (
-  is      => 'ro',
-  isa     => 'Str',
-  default => 'queue',
+    is      => 'ro',
+    isa     => 'Str',
+    default => 'queue',
 );
 
 =attr safe
@@ -56,22 +56,22 @@ Defaults to true.
 =cut
 
 has safe => (
-  is      => 'ro',
-  isa     => 'Bool',
-  default => 1,
+    is      => 'ro',
+    isa     => 'Bool',
+    default => 1,
 );
 
 # Internal collection attribute
 
 has _coll => (
-  is         => 'ro',
-  isa        => 'MongoDB::Collection',
-  lazy_build => 1,
+    is         => 'ro',
+    isa        => 'MongoDB::Collection',
+    lazy_build => 1,
 );
 
 sub _build__coll {
-  my ($self) = @_;
-  return $self->db->get_collection( $self->name );
+    my ($self) = @_;
+    return $self->db->get_collection( $self->name );
 }
 
 # Methods
@@ -96,17 +96,16 @@ to C<reserve_task>.  See that method for more details.
 =cut
 
 sub add_task {
-  my ( $self, $data, $opts ) = @_;
+    my ( $self, $data, $opts ) = @_;
 
-  $self->_coll->insert(
-    {
-      %$data,
-      $PRIORITY => $opts->{priority} // time(),
-    },
-    {
-      safe => $self->safe,
-    }
-  );
+    $self->_coll->insert(
+        {
+            %$data, $PRIORITY => $opts->{priority} // time(),
+        },
+        {
+            safe => $self->safe,
+        }
+    );
 }
 
 =method reserve_task
@@ -136,28 +135,28 @@ returns C<undef>.
 =cut
 
 sub reserve_task {
-  my ( $self, $opts ) = @_;
+    my ( $self, $opts ) = @_;
 
-  my $now    = time();
-  my $result = $self->db->run_command(
-    {
-      findAndModify => $self->name,
-      query         => {
-        $PRIORITY => { '$lte' => $opts->{max_priority} // $now },
-        $RESERVED => { '$exists' => boolean::false },
-      },
-      sort => { $PRIORITY => 1 },
-      update => { '$set' => { $RESERVED => $now } },
-    },
-  );
+    my $now    = time();
+    my $result = $self->db->run_command(
+        {
+            findAndModify => $self->name,
+            query         => {
+                $PRIORITY => { '$lte' => $opts->{max_priority} // $now },
+                $RESERVED => { '$exists' => boolean::false },
+            },
+            sort => { $PRIORITY => 1 },
+            update => { '$set' => { $RESERVED => $now } },
+        },
+    );
 
-  # XXX check get_last_error? -- xdg, 2012-08-29
-  if ( ref $result ) {
-    return $result->{value}; # could be undef if not found
-  }
-  else {
-    die "MongoDB error: $result"; # XXX docs unclear, but imply string error
-  }
+    # XXX check get_last_error? -- xdg, 2012-08-29
+    if ( ref $result ) {
+        return $result->{value}; # could be undef if not found
+    }
+    else {
+        die "MongoDB error: $result"; # XXX docs unclear, but imply string error
+    }
 }
 
 =method reschedule_task
@@ -178,15 +177,15 @@ to C<reserve_task>.  See that method for more details.
 =cut
 
 sub reschedule_task {
-  my ( $self, $task, $opts ) = @_;
-  $self->_coll->update(
-    { $ID => $task->{$ID} },
-    {
-      '$unset'  => { $RESERVED => 0 },
-      '$set'    => { $PRIORITY => $opts->{priority} // $task->{$PRIORITY} },
-    },
-    { safe => $self->safe }
-  );
+    my ( $self, $task, $opts ) = @_;
+    $self->_coll->update(
+        { $ID => $task->{$ID} },
+        {
+            '$unset' => { $RESERVED => 0 },
+            '$set'   => { $PRIORITY => $opts->{priority} // $task->{$PRIORITY} },
+        },
+        { safe => $self->safe }
+    );
 }
 
 =method remove_task
@@ -198,8 +197,8 @@ Removes a task from the queue (i.e. indicating the task has been processed).
 =cut
 
 sub remove_task {
-  my ( $self, $task ) = @_;
-  $self->_coll->remove( { $ID => $task->{$ID} } );
+    my ( $self, $task ) = @_;
+    $self->_coll->remove( { $ID => $task->{$ID} } );
 }
 
 =method apply_timeout
@@ -214,14 +213,14 @@ only dead/hung tasks are returned to the active queue.
 =cut
 
 sub apply_timeout {
-  my ( $self, $timeout ) = @_;
-  $timeout //= 120;
-  my $cutoff = time() - $timeout;
-  $self->_coll->update(
-    { $RESERVED => { '$lt'     => $cutoff } },
-    { '$unset'  => { $RESERVED => 0 } },
-    { safe => $self->safe, multiple => 1 }
-  );
+    my ( $self, $timeout ) = @_;
+    $timeout //= 120;
+    my $cutoff = time() - $timeout;
+    $self->_coll->update(
+        { $RESERVED => { '$lt'     => $cutoff } },
+        { '$unset'  => { $RESERVED => 0 } },
+        { safe => $self->safe, multiple => 1 }
+    );
 }
 
 =method search
@@ -229,18 +228,22 @@ sub apply_timeout {
 =cut
 
 sub search {
-  my ($self, $query, $opts) = @_;
-  $query = {} unless ref $query eq 'HASH';
-  $opts = {} unless ref $opts eq 'HASH';
-  if ( exists $opts->{reserved} ) {
-    $query->{$RESERVED} = { '$exists' => $opts->{reserved} ? boolean::true : boolean::false },
-  }
-  my $cursor = $self->_coll->query( $query );
-  if ( $opts->{fields} && ref $opts->{fields} ) {
-    my $spec = ref $opts->{fields} eq 'HASH' ? $opts->{fields} : { map { $_ => 1 } @{ $opts->{fields} } };
-    $cursor->fields( $spec );
-  }
-  return $cursor->all;
+    my ( $self, $query, $opts ) = @_;
+    $query = {} unless ref $query eq 'HASH';
+    $opts  = {} unless ref $opts eq 'HASH';
+    if ( exists $opts->{reserved} ) {
+        $query->{$RESERVED} =
+          { '$exists' => $opts->{reserved} ? boolean::true : boolean::false };
+    }
+    my $cursor = $self->_coll->query($query);
+    if ( $opts->{fields} && ref $opts->{fields} ) {
+        my $spec =
+          ref $opts->{fields} eq 'HASH'
+          ? $opts->{fields}
+          : { map { $_ => 1 } @{ $opts->{fields} } };
+        $cursor->fields($spec);
+    }
+    return $cursor->all;
 }
 
 =method size
@@ -252,8 +255,8 @@ Returns the number of tasks in the queue, including in-progress ones.
 =cut
 
 sub size {
-  my ($self) = @_;
-  return $self->_coll->count;
+    my ($self) = @_;
+    return $self->_coll->count;
 }
 
 =method waiting
@@ -265,8 +268,8 @@ Returns the number of tasks in the queue that have not been reserved.
 =cut
 
 sub waiting {
-  my ($self) = @_;
-  return $self->_coll->count( { $RESERVED => { '$exists' => boolean::false } } );
+    my ($self) = @_;
+    return $self->_coll->count( { $RESERVED => { '$exists' => boolean::false } } );
 }
 
 no Any::Moose;

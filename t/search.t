@@ -63,14 +63,14 @@ is( scalar @found, 1, "got correct number from search for reserved" );
     my $h = $_;
     +{ map { ; $_ => $h->{$_} } qw/first last tel/ }
 } @found;
-cmp_bag( \@got, [ $task_list[ 0 ] ], "search() got all tasks" )
+cmp_bag( \@got, [ $task_list[0] ], "search() got all tasks" )
   or diag explain \@got;
 
 @found = $queue->search( { last => "Smith" }, { fields => [qw/first tel/] } );
-is( scalar @found, 1, "got correct number from search on last name" );
+is( scalar @found,    1,      "got correct number from search on last name" );
 is( $found[0]{first}, 'John', "got first requested field" );
-is( $found[0]{tel}, '555-123-4567', "got next requested field" );
-is( $found[0]{last}, undef, "did not get unrequested field" );
+is( $found[0]{tel},  '555-123-4567', "got next requested field" );
+is( $found[0]{last}, undef,          "did not get unrequested field" );
 
 done_testing;
 
