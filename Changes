@@ -2,6 +2,8 @@ Revision history for MongoDBx-Queue
 
 {{$NEXT}}
 
+0.003     2013-03-28 18:34:49 America/New_York
+
   [ADDED]
 
   - Added 'search' and 'peek' methods to allow inspection of the queue
