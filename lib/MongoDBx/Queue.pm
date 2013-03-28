@@ -229,8 +229,17 @@ sub apply_timeout {
 =cut
 
 sub search {
-  my ($self, $query) = @_;
+  my ($self, $query, $opts) = @_;
+  $query = {} unless ref $query eq 'HASH';
+  $opts = {} unless ref $opts eq 'HASH';
+  if ( exists $opts->{reserved} ) {
+    $query->{$RESERVED} = { '$exists' => $opts->{reserved} ? boolean::true : boolean::false },
+  }
   my $cursor = $self->_coll->query( $query );
+  if ( $opts->{fields} && ref $opts->{fields} ) {
+    my $spec = ref $opts->{fields} eq 'HASH' ? $opts->{fields} : { map { $_ => 1 } @{ $opts->{fields} } };
+    $cursor->fields( $spec );
+  }
   return $cursor->all;
 }
 
