@@ -72,6 +72,18 @@ is( $found[0]{first}, 'John', "got first requested field" );
 is( $found[0]{tel},  '555-123-4567', "got next requested field" );
 is( $found[0]{last}, undef,          "did not get unrequested field" );
 
+@found = $queue->search( { _id => $found[0]{_id} } );
+is( scalar @found,    1,              "got correct number from search on _id" );
+is( $found[0]{first}, 'John',         "got first requested field" );
+is( $found[0]{tel},   '555-123-4567', "got next requested field" );
+is( $found[0]{last},  'Smith',        "got last requested field" );
+
+@found = $queue->peek( $found[0] );
+is( scalar @found,    1,              "got correct number from peek on task" );
+is( $found[0]{first}, 'John',         "got first field" );
+is( $found[0]{tel},   '555-123-4567', "got next field" );
+is( $found[0]{last},  'Smith',        "got last field" );
+
 done_testing;
 
 # COPYRIGHT

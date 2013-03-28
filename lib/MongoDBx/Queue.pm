@@ -223,6 +223,11 @@ sub apply_timeout {
     );
 }
 
+sub peek {
+  my ($self, $task) = @_;
+  return $self->search( { $ID => $task->{$ID} } );
+}
+
 sub search {
     my ( $self, $query, $opts ) = @_;
     $query = {} unless ref $query eq 'HASH';
