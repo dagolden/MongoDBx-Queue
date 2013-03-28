@@ -223,10 +223,6 @@ sub apply_timeout {
     );
 }
 
-=method search
-
-=cut
-
 sub search {
     my ( $self, $query, $opts ) = @_;
     $query = {} unless ref $query eq 'HASH';
