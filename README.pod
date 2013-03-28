@@ -1,12 +1,14 @@
 =pod
 
+=encoding utf-8
+
 =head1 NAME
 
 MongoDBx::Queue - A message queue implemented with MongoDB
 
 =head1 VERSION
 
-version 0.002
+version 0.003
 
 =head1 SYNOPSIS
 
@@ -198,6 +200,25 @@ Removes reservations that occurred more than C<$seconds> ago.  If no
 argument is given, the timeout defaults to 120 seconds.  The timeout
 should be set longer than the expected task processing time, so that
 only dead/hung tasks are returned to the active queue.
+
+=head2 search
+
+  my @results = $queue->search( \%query, \%options );
+
+Returns a list of tasks in the queue based on search criteria.  The
+query should be expressed in the usual MongoDB fashion.  In addition
+to MongoDB options C<limit>, C<skip> and C<sort>, this method supports
+a C<reserved> option.  If present, results will be limited to reserved
+tasks if true or unreserved tasks if false.
+
+=head2 peek
+
+  $queue->peek( $task );
+
+Retrieves a copy of the task from the queue.  This is useful to retrieve all
+fields from a partial-field result from C<search>.  It is equivalent to:
+
+  $self->search( { _id => $task->{_id} } );
 
 =head2 size
 

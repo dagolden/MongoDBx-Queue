@@ -223,10 +223,17 @@ sub apply_timeout {
     );
 }
 
-sub peek {
-  my ($self, $task) = @_;
-  return $self->search( { $ID => $task->{$ID} } );
-}
+=method search
+
+  my @results = $queue->search( \%query, \%options );
+
+Returns a list of tasks in the queue based on search criteria.  The
+query should be expressed in the usual MongoDB fashion.  In addition
+to MongoDB options C<limit>, C<skip> and C<sort>, this method supports
+a C<reserved> option.  If present, results will be limited to reserved
+tasks if true or unreserved tasks if false.
+
+=cut
 
 sub search {
     my ( $self, $query, $opts ) = @_;
@@ -246,6 +253,22 @@ sub search {
         $cursor->fields($spec);
     }
     return $cursor->all;
+}
+
+=method peek
+
+  $queue->peek( $task );
+
+Retrieves a copy of the task from the queue.  This is useful to retrieve all
+fields from a partial-field result from C<search>.  It is equivalent to:
+
+  $self->search( { _id => $task->{_id} } );
+
+=cut
+
+sub peek {
+    my ( $self, $task ) = @_;
+    return $self->search( { $ID => $task->{$ID} } );
 }
 
 =method size

@@ -4,7 +4,7 @@
       "David Golden <dagolden@cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 4.300021, CPAN::Meta::Converter version 2.120921",
+   "generated_by" : "Dist::Zilla version 4.300031, CPAN::Meta::Converter version 2.120921",
    "license" : [
       "apache_2_0"
    ],
@@ -30,6 +30,14 @@
             "ExtUtils::MakeMaker" : "6.30"
          }
       },
+      "develop" : {
+         "requires" : {
+            "Pod::Coverage::TrustPod" : "0",
+            "Test::CPAN::Meta" : "0",
+            "Test::Pod" : "1.41",
+            "Test::Pod::Coverage" : "1.08"
+         }
+      },
       "runtime" : {
          "requires" : {
             "Any::Moose" : "0",
@@ -43,8 +51,12 @@
       },
       "test" : {
          "requires" : {
+            "ExtUtils::MakeMaker" : "0",
             "File::Find" : "0",
+            "File::Spec::Functions" : "0",
             "File::Temp" : "0",
+            "List::Util" : "0",
+            "Test::Deep" : "0",
             "Test::More" : "0.96"
          }
       }
@@ -52,7 +64,7 @@
    "provides" : {
       "MongoDBx::Queue" : {
          "file" : "lib/MongoDBx/Queue.pm",
-         "version" : "0.002"
+         "version" : "0.003"
       }
    },
    "release_status" : "stable",
@@ -67,6 +79,6 @@
          "web" : "https://github.com/dagolden/mongodbx-queue"
       }
    },
-   "version" : "0.002"
+   "version" : "0.003"
 }
 
