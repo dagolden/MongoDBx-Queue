@@ -257,18 +257,21 @@ sub search {
 
 =method peek
 
-  $queue->peek( $task );
+  $task = $queue->peek( $task );
 
-Retrieves a copy of the task from the queue.  This is useful to retrieve all
+Retrieves a full copy of the task from the queue.  This is useful to retrieve all
 fields from a partial-field result from C<search>.  It is equivalent to:
 
   $self->search( { _id => $task->{_id} } );
+
+Returns undef if the task is not found.
 
 =cut
 
 sub peek {
     my ( $self, $task ) = @_;
-    return $self->search( { $ID => $task->{$ID} } );
+    my @result = $self->search( { $ID => $task->{$ID} } );
+    return wantarray ? @result : $result[0];
 }
 
 =method size

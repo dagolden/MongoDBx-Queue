@@ -78,14 +78,20 @@ is( $found[0]{first}, 'John',         "got first requested field" );
 is( $found[0]{tel},   '555-123-4567', "got next requested field" );
 is( $found[0]{last},  'Smith',        "got last requested field" );
 
-@found = $queue->peek( $found[0] );
-is( scalar @found,    1,              "got correct number from peek on task" );
-is( $found[0]{first}, 'John',         "got first field" );
-is( $found[0]{tel},   '555-123-4567', "got next field" );
-is( $found[0]{last},  'Smith',        "got last field" );
+my $peek = $queue->peek( $found[0] );
+ok( $peek, "peek found result" );
+is( $peek->{first}, 'John',         "got first field" );
+is( $peek->{tel},   '555-123-4567', "got next field" );
+is( $peek->{last},  'Smith',        "got last field" );
+
+$peek = $queue->peek( { _id => '123456789' } );
+is( $peek, undef, "peek unknown returns undef in scalar context" );
+
+my @empty = $queue->peek( { _id => '123456789' } );
+is( scalar @empty, 0, "peek unknown returns empty list in list context" );
 
 @found = $queue->search( { last => "Doe" }, { limit => 1 } );
-is( scalar @found,    1,      "got correct number from search limited to 1 result" );
+is( scalar @found, 1, "got correct number from search limited to 1 result" );
 
 done_testing;
 
