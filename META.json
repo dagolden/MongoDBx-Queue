@@ -4,7 +4,7 @@
       "David Golden <dagolden@cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 4.300031, CPAN::Meta::Converter version 2.120921",
+   "generated_by" : "Dist::Zilla version 4.300034, CPAN::Meta::Converter version 2.130880",
    "license" : [
       "apache_2_0"
    ],
@@ -64,7 +64,7 @@
    "provides" : {
       "MongoDBx::Queue" : {
          "file" : "lib/MongoDBx/Queue.pm",
-         "version" : "0.003"
+         "version" : "0.004"
       }
    },
    "release_status" : "stable",
@@ -79,6 +79,6 @@
          "web" : "https://github.com/dagolden/mongodbx-queue"
       }
    },
-   "version" : "0.003"
+   "version" : "0.004"
 }
 
