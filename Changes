@@ -2,6 +2,8 @@ Revision history for MongoDBx-Queue
 
 {{$NEXT}}
 
+0.004     2013-04-17 20:06:53 America/New_York
+
   [FIXED]
 
   - Have peek() do the right thing for list or scalar return context
