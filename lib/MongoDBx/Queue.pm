@@ -97,14 +97,8 @@ to C<reserve_task>.  See that method for more details.
 sub add_task {
     my ( $self, $data, $opts ) = @_;
 
-    $self->_coll->insert(
-        {
-            %$data, $PRIORITY => $opts->{priority} // time(),
-        },
-        {
-            safe => $self->safe,
-        }
-    );
+    $self->_coll->insert( { %$data, $PRIORITY => $opts->{priority} // time(), },
+        { safe => $self->safe, } );
 }
 
 =method reserve_task

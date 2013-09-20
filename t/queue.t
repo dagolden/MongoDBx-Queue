@@ -94,7 +94,6 @@ ok( $queue->remove_task($task), "removed task" );
 
 is( $queue->size, 0, "size() shows 0" );
 
-
 done_testing;
 
 # COPYRIGHT
