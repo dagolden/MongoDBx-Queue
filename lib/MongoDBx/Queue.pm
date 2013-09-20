@@ -8,13 +8,12 @@ package MongoDBx::Queue;
 # VERSION
 
 use Any::Moose;
-use Const::Fast qw/const/;
 use MongoDB 0.45 ();
 use boolean;
 
-const my $ID       => '_id';
-const my $RESERVED => '_r';
-const my $PRIORITY => '_p';
+my $ID       => '_id';
+my $RESERVED => '_r';
+my $PRIORITY => '_p';
 
 =method new
 

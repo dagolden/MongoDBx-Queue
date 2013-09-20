@@ -1,5 +1,4 @@
 requires "Any::Moose" => "0";
-requires "Const::Fast" => "0";
 requires "MongoDB" => "0.45";
 requires "boolean" => "0";
 requires "perl" => "5.010";
