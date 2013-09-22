@@ -2,6 +2,33 @@ Revision history for MongoDBx-Queue
 
 {{$NEXT}}
 
+    [INCOMPATIBLE CHANGES]
+
+    - MongoDBx::Queue prior to version 1.000 were not fork-safe.  A fork
+      could cause MongoDB connections to hang.  As of 1.000, MongoDB
+      connections are managed via MooseX::Role::MongoDB, which provides
+      fork-safety.
+
+    - As result of this change, attributes have changed.  MongoDBx::Queue
+      no longer has a C<db> attributed taking a MongoDB::Database argument
+      and the C<name> attribute has been renamed to C<collection_name>
+
+    - Now, you provide C<client_options> controlling the connection to
+      the database.  You provide C<database_name> to indicate the database
+      to hold your queue.  And you provide C<collection_name> to indicate
+      the collection to hold the queue.
+
+    - No attributes are required any more.  By default, MongoDBx::Queue
+      will connect to localhost on the default MongoDB port, will use
+      the 'test' database and the 'queue' collection.
+
+    [FIXES]
+
+    - Fixed task reservation on Perl v5.18 that borke due to hash-order
+      randomization. MongoDB expects command documents to be ordered a
+      certain way so we now use array references instead of hash references
+      to pass such commands.
+
     [INTERNAL]
 
     - Dropped Const::Fast as prerequisite
