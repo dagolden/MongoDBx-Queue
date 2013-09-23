@@ -22,6 +22,11 @@ Revision history for MongoDBx-Queue
       will connect to localhost on the default MongoDB port, will use
       the 'test' database and the 'queue' collection.
 
+    [ADDED]
+
+    - Automatically ensures an index on priority is in place on the
+      collection
+
     [FIXES]
 
     - Fixed task reservation on Perl v5.18 that borke due to hash-order

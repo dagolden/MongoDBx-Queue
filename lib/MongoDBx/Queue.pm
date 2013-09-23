@@ -82,6 +82,13 @@ has safe => (
 sub _build__mongo_default_database { $_[0]->database_name }
 sub _build__mongo_client_options   { $_[0]->client_options }
 
+sub BUILD {
+    my ($self) = @_;
+    # ensure index on PRIORITY in the same order we use for reserving
+    $self->mongo_collection( $self->collection_name )
+      ->ensure_index( [ $PRIORITY => 1 ] );
+}
+
 #--------------------------------------------------------------------------#
 # Public methods
 #--------------------------------------------------------------------------#
@@ -324,6 +331,8 @@ __PACKAGE__->meta->make_immutable;
 
 1;
 
+=for Pod::Coverage BUILD
+
 =head1 SYNOPSIS
 
     use v5.10;
@@ -366,6 +375,7 @@ Features:
 * atomic message reservation
 * stalled reservations can be timed-out
 * task rescheduling
+* automatically creates correct index
 * fork-safe
 
 Not yet implemented:
