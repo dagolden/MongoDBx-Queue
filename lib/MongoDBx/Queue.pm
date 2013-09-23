@@ -326,27 +326,27 @@ __PACKAGE__->meta->make_immutable;
 
 =head1 SYNOPSIS
 
-  use v5.10;
-  use MongoDB;
-  use MongoDBx::Queue;
+    use v5.10;
+    use MongoDBx::Queue;
 
-  my $connection = MongoDB::Connection->new( @parameters );
-  my $database = $connection->get_database("queue_db");
+    my $queue = MongoDBx::Queue->new(
+        database_name => "queue_db",
+        client_options => {
+            host => "mongodb://example.net:27017",
+            username => "willywonka",
+            password => "ilovechocolate",
+        }
+    );
 
-  my $queue = MongoDBx::Queue->new( { db => $database } );
+    $queue->add_task( { msg => "Hello World" } );
+    $queue->add_task( { msg => "Goodbye World" } );
 
-  $queue->add_task( { msg => "Hello World" } );
-  $queue->add_task( { msg => "Goodbye World" } );
-
-  while ( my $task = $queue->reserve_task ) {
-    say $task->{msg};
-    $queue->remove_task( $task );
-  }
+    while ( my $task = $queue->reserve_task ) {
+        say $task->{msg};
+        $queue->remove_task( $task );
+    }
 
 =head1 DESCRIPTION
-
-B<ALPHA> -- this is an early release and is still in development.  Testing
-and feedback welcome.
 
 MongoDBx::Queue implements a simple, prioritized message queue using MongoDB as
 a backend.  By default, messages are prioritized by insertion time, creating a
@@ -366,6 +366,7 @@ Features:
 * atomic message reservation
 * stalled reservations can be timed-out
 * task rescheduling
+* fork-safe
 
 Not yet implemented:
 
