@@ -20,7 +20,7 @@ my $ID       = '_id';
 my $RESERVED = '_r';
 my $PRIORITY = '_p';
 
-with 'MooseX::Role::MongoDB';
+with 'MooseX::Role::Logger', 'MooseX::Role::MongoDB' => { -version => 0.003 };
 
 #--------------------------------------------------------------------------#
 # Public attributes
