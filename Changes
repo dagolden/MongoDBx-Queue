@@ -2,8 +2,6 @@ Revision history for MongoDBx-Queue
 
 {{$NEXT}}
 
-2.000
-
     [INCOMPATIBLE CHANGES]
 
     - Requires MongoDB driver version 2.0.0 and MooseX::Role::MongoDB
