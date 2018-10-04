@@ -1,0 +1,72 @@
+use strict;
+use warnings;
+
+use 5.010;
+
+use ExtUtils::MakeMaker 6.17;
+
+my %WriteMakefileArgs = (
+  "ABSTRACT" => "A message queue implemented with MongoDB",
+  "AUTHOR" => "David Golden <dagolden\@cpan.org>",
+  "CONFIGURE_REQUIRES" => {
+    "ExtUtils::MakeMaker" => "6.17"
+  },
+  "DISTNAME" => "MongoDBx-Queue",
+  "LICENSE" => "apache",
+  "MIN_PERL_VERSION" => "5.010",
+  "NAME" => "MongoDBx::Queue",
+  "PREREQ_PM" => {
+    "MongoDB" => "0.702",
+    "Moose" => 2,
+    "MooseX::AttributeShortcuts" => 0,
+    "MooseX::Role::Logger" => 0,
+    "MooseX::Role::MongoDB" => "0.006",
+    "MooseX::Types::Moose" => 0,
+    "Tie::IxHash" => 0,
+    "boolean" => 0,
+    "namespace::autoclean" => 0,
+    "strict" => 0,
+    "warnings" => 0
+  },
+  "TEST_REQUIRES" => {
+    "ExtUtils::MakeMaker" => 0,
+    "File::Spec" => 0,
+    "Test::Deep" => 0,
+    "Test::More" => "0.96"
+  },
+  "VERSION" => "1.003",
+  "test" => {
+    "TESTS" => "t/*.t"
+  }
+);
+
+
+my %FallbackPrereqs = (
+  "ExtUtils::MakeMaker" => 0,
+  "File::Spec" => 0,
+  "MongoDB" => "0.702",
+  "Moose" => 2,
+  "MooseX::AttributeShortcuts" => 0,
+  "MooseX::Role::Logger" => 0,
+  "MooseX::Role::MongoDB" => "0.006",
+  "MooseX::Types::Moose" => 0,
+  "Test::Deep" => 0,
+  "Test::More" => "0.96",
+  "Tie::IxHash" => 0,
+  "boolean" => 0,
+  "namespace::autoclean" => 0,
+  "strict" => 0,
+  "warnings" => 0
+);
+
+
+unless ( eval { ExtUtils::MakeMaker->VERSION(6.63_03) } ) {
+  delete $WriteMakefileArgs{TEST_REQUIRES};
+  delete $WriteMakefileArgs{BUILD_REQUIRES};
+  $WriteMakefileArgs{PREREQ_PM} = \%FallbackPrereqs;
+}
+
+delete $WriteMakefileArgs{CONFIGURE_REQUIRES}
+  unless eval { ExtUtils::MakeMaker->VERSION(6.52) };
+
+WriteMakefile(%WriteMakefileArgs);

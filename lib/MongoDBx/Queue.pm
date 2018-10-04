@@ -5,13 +5,14 @@ use warnings;
 package MongoDBx::Queue;
 
 # ABSTRACT: A message queue implemented with MongoDB
-# VERSION
+
+our $VERSION = '1.003';
 
 use Moose 2;
 use MooseX::Types::Moose qw/:all/;
 use MooseX::AttributeShortcuts;
 
-use MongoDB 0.702 ();
+use MongoDB 2 ();
 use Tie::IxHash;
 use boolean;
 use namespace::autoclean;
@@ -20,7 +21,7 @@ my $ID       = '_id';
 my $RESERVED = '_r';
 my $PRIORITY = '_p';
 
-with 'MooseX::Role::Logger', 'MooseX::Role::MongoDB' => { -version => 0.006 };
+with 'MooseX::Role::Logger', 'MooseX::Role::MongoDB' => { -version => 1.000 };
 
 #--------------------------------------------------------------------------#
 # Public attributes
@@ -66,27 +67,21 @@ has collection_name => (
     default => 'queue',
 );
 
-=attr safe
-
-Boolean that controls whether 'safe' inserts/updates are done.
-Defaults to true.
-
-=cut
-
-has safe => (
-    is      => 'ro',
-    isa     => 'Bool',
-    default => 1,
-);
-
 sub _build__mongo_default_database { $_[0]->database_name }
-sub _build__mongo_client_options   { $_[0]->client_options }
+
+sub _build__mongo_client_options {
+    return {
+        write_concern => { w     => "majority" },
+        read_concern  => { level => "majority" },
+        %{ $_[0]->client_options },
+    };
+}
 
 sub BUILD {
     my ($self) = @_;
     # ensure index on PRIORITY in the same order we use for reserving
     $self->_mongo_collection( $self->collection_name )
-      ->ensure_index( [ $PRIORITY => 1 ] );
+      ->indexes->create_one( [ $PRIORITY => 1 ] );
 }
 
 #--------------------------------------------------------------------------#
@@ -129,8 +124,7 @@ sub add_task {
     my ( $self, $data, $opts ) = @_;
 
     $self->_mongo_collection( $self->collection_name )
-      ->insert( { %$data, $PRIORITY => $opts->{priority} // time(), },
-        { safe => $self->safe, } );
+      ->insert_one( { %$data, $PRIORITY => $opts->{priority} // time() } );
 }
 
 =method reserve_task
@@ -162,26 +156,15 @@ returns C<undef>.
 sub reserve_task {
     my ( $self, $opts ) = @_;
 
-    my $now    = time();
-    my $result = $self->_mongo_database->run_command(
-        [
-            findAndModify => $self->collection_name,
-            query         => {
-                $PRIORITY => { '$lte' => $opts->{max_priority} // $now },
-                $RESERVED => { '$exists' => boolean::false },
-            },
-            sort => { $PRIORITY => 1 },
-            update => { '$set' => { $RESERVED => $now } },
-        ]
+    my $now = time();
+    return $self->_mongo_collection( $self->collection_name )->find_one_and_update(
+        {
+            $PRIORITY => { '$lte'    => $opts->{max_priority} // $now },
+            $RESERVED => { '$exists' => boolean::false },
+        },
+        { '$set' => { $RESERVED => $now } },
+        { sort   => [ $PRIORITY => 1 ] },
     );
-
-    # XXX check get_last_error? -- xdg, 2012-08-29
-    if ( ref $result ) {
-        return $result->{value}; # could be undef if not found
-    }
-    else {
-        die "MongoDB error: $result"; # XXX docs unclear, but imply string error
-    }
 }
 
 =method reschedule_task
@@ -203,13 +186,12 @@ to C<reserve_task>.  See that method for more details.
 
 sub reschedule_task {
     my ( $self, $task, $opts ) = @_;
-    $self->_mongo_collection( $self->collection_name )->update(
+    $self->_mongo_collection( $self->collection_name )->update_one(
         { $ID => $task->{$ID} },
         {
             '$unset' => { $RESERVED => 0 },
             '$set'   => { $PRIORITY => $opts->{priority} // $task->{$PRIORITY} },
         },
-        { safe => $self->safe }
     );
 }
 
@@ -224,7 +206,7 @@ Removes a task from the queue (i.e. indicating the task has been processed).
 sub remove_task {
     my ( $self, $task ) = @_;
     $self->_mongo_collection( $self->collection_name )
-      ->remove( { $ID => $task->{$ID} } );
+      ->delete_one( { $ID => $task->{$ID} } );
 }
 
 =method apply_timeout
@@ -242,10 +224,9 @@ sub apply_timeout {
     my ( $self, $timeout ) = @_;
     $timeout //= 120;
     my $cutoff = time() - $timeout;
-    $self->_mongo_collection( $self->collection_name )->update(
+    $self->_mongo_collection( $self->collection_name )->update_many(
         { $RESERVED => { '$lt'     => $cutoff } },
         { '$unset'  => { $RESERVED => 0 } },
-        { safe => $self->safe, multiple => 1 }
     );
 }
 
@@ -255,8 +236,9 @@ sub apply_timeout {
 
 Returns a list of tasks in the queue based on search criteria.  The
 query should be expressed in the usual MongoDB fashion.  In addition
-to MongoDB options C<limit>, C<skip> and C<sort>, this method supports
-a C<reserved> option.  If present, results will be limited to reserved
+to MongoDB options (e.g. C<limit>, C<skip> and C<sort>) as described
+in the MongoDB documentation for L<MongoDB::Collection/find>, this method
+supports a C<reserved> option.  If present, results will be limited to reserved
 tasks if true or unreserved tasks if false.
 
 =cut
@@ -271,14 +253,7 @@ sub search {
         delete $opts->{reserved};
     }
     my $cursor =
-      $self->_mongo_collection( $self->collection_name )->query( $query, $opts );
-    if ( $opts->{fields} && ref $opts->{fields} ) {
-        my $spec =
-          ref $opts->{fields} eq 'HASH'
-          ? $opts->{fields}
-          : { map { $_ => 1 } @{ $opts->{fields} } };
-        $cursor->fields($spec);
-    }
+      $self->_mongo_collection( $self->collection_name )->find( $query, $opts );
     return $cursor->all;
 }
 
@@ -287,7 +262,7 @@ sub search {
   $task = $queue->peek( $task );
 
 Retrieves a full copy of the task from the queue.  This is useful to retrieve all
-fields from a partial-field result from C<search>.  It is equivalent to:
+fields from a projected result from C<search>.  It is equivalent to:
 
   $self->search( { _id => $task->{_id} } );
 
@@ -311,7 +286,7 @@ Returns the number of tasks in the queue, including in-progress ones.
 
 sub size {
     my ($self) = @_;
-    return $self->_mongo_collection( $self->collection_name )->count;
+    return $self->_mongo_collection( $self->collection_name )->count_documents( {} );
 }
 
 =method waiting
@@ -325,7 +300,7 @@ Returns the number of tasks in the queue that have not been reserved.
 sub waiting {
     my ($self) = @_;
     return $self->_mongo_collection( $self->collection_name )
-      ->count( { $RESERVED => { '$exists' => boolean::false } } );
+      ->count_documents( { $RESERVED => { '$exists' => boolean::false } } );
 }
 
 __PACKAGE__->meta->make_immutable;
