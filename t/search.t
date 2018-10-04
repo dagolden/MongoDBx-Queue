@@ -14,7 +14,7 @@ my $conn = eval {
 };
 plan skip_all => "No MongoDB on localhost" unless $conn;
 
-my $cl_name = "mongodbx_queue_" . time;
+my $cl_name = "mongodbx_queue_" . time . $$;
 
 my ( $queue, $task, $task2 );
 
