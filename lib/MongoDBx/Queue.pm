@@ -104,6 +104,7 @@ sub BUILD {
 =method new
 
    $queue = MongoDBx::Queue->new(
+        version => 2,
         database_name   => "my_app",
         client_options  => {
             host => "mongodb://example.net:27017",
@@ -233,6 +234,7 @@ __PACKAGE__->meta->make_immutable;
     use MongoDBx::Queue;
 
     my $queue = MongoDBx::Queue->new(
+        version => 2,
         database_name => "queue_db",
         client_options => {
             host => "mongodb://example.net:27017",
