@@ -19,7 +19,7 @@ my $cl_name = "mongodbx_queue_" . time . $$;
 my ( $queue, $task, $task2 );
 
 $queue = new_ok( 'MongoDBx::Queue', [ { collection_name => $cl_name } ] );
-$queue->_mongo_collection($cl_name)->drop;
+$queue->_implementation->_mongo_collection($cl_name)->drop;
 
 my @task_list = (
     { first => "John", last => "Doe",   tel => "555-456-7890" },
@@ -97,7 +97,7 @@ is( scalar @empty, 0, "peek unknown returns empty list in list context" );
 @found = $queue->search( { last => "Doe" }, { limit => 1 } );
 is( scalar @found, 1, "got correct number from search limited to 1 result" );
 
-$queue->_mongo_collection($cl_name)->drop unless $ENV{PERL_MONGODBX_QUEUE_DEBUG};
+$queue->_implementation->_mongo_collection($cl_name)->drop unless $ENV{PERL_MONGODBX_QUEUE_DEBUG};
 
 done_testing;
 

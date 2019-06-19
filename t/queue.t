@@ -19,7 +19,7 @@ my $cl_name = "mongodbx_queue_" . time . $$;
 my ( $queue, $task, $task2 );
 
 $queue = new_ok( 'MongoDBx::Queue', [ { collection_name => $cl_name } ] );
-$queue->_mongo_collection($cl_name)->drop;
+$queue->_implementation->_mongo_collection($cl_name)->drop;
 
 ok( $queue->add_task( { msg => "Hello World" } ), "added a task" );
 
@@ -97,7 +97,7 @@ ok( $queue->remove_task($task), "removed task" );
 
 is( $queue->size, 0, "size() shows 0" );
 
-$queue->_mongo_collection($cl_name)->drop unless $ENV{PERL_MONGODBX_QUEUE_DEBUG};
+$queue->_implementation->_mongo_collection($cl_name)->drop unless $ENV{PERL_MONGODBX_QUEUE_DEBUG};
 
 done_testing;
 
