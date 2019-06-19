@@ -14,7 +14,7 @@ my $conn = eval {
 };
 plan skip_all => "No MongoDB on localhost" unless $conn;
 
-for my $version ( 1 ) {
+for my $version ( 1, 2 ) {
   subtest "MongoDBx::Queue::v$version" => sub {
     test_queue($version)
   };
