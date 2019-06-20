@@ -45,6 +45,10 @@ The implementation version to use as a backend.  Defaults to '1', which is the
 legacy implementation for backwards compatibility.  Version '2' has better
 index coverage and will perform better for very large queues.
 
+B<WARNING> Versions are not compatible.  You MUST NOT have V1 and V2 clients
+using the same database+collection name.  See L</MIGRATION BETWEEN VERSIONS>
+for more.
+
 =cut
 
 has version => (
@@ -282,6 +286,18 @@ Not yet implemented:
 
 Warning: do not use with capped collections, as the queued messages will not
 meet the constraints required by a capped collection.
+
+=head1 MIGRATION BETWEEN VERSIONS
+
+Implementation versions are not compatible.  Migration of active tasks from
+version '1' to version '2' is an exercise left to end users.
+
+One approach to migration could be to run a script with two C<MongoDBx::Queue>
+clients, one using version '1' and one using version '2', using different
+C<database_name> attributes.  Such a script could iteratively reserve a task
+with the v1 client, add the task via the v2 client, then remove it via the v1
+client.  Workers could be operating on one or both versions of the queue while
+migration is going on, depending on your needs.
 
 =cut
 
