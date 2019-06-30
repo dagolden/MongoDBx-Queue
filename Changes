@@ -2,8 +2,6 @@ Revision history for MongoDBx-Queue
 
 {{$NEXT}}
 
-2.001
-
     [ADDED]
 
     - Added 'version' option to toggle between legacy 'v1' implementation and
