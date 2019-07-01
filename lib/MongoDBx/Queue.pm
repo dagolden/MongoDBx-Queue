@@ -6,7 +6,7 @@ package MongoDBx::Queue;
 
 # ABSTRACT: A message queue implemented with MongoDB
 
-our $VERSION = '2.001';
+our $VERSION = '2.002';
 
 use Moose 2;
 use MooseX::Types::Moose qw/:all/;

@@ -6,7 +6,7 @@ package MongoDBx::Queue::_V1;
 
 # V1 implementation
 
-our $VERSION = '2.001';
+our $VERSION = '2.002';
 
 use Moose 2;
 
