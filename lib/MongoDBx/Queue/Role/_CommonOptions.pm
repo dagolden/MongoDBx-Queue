@@ -2,7 +2,7 @@ use 5.010;
 use strict;
 use warnings;
 
-package MongoDBx::Queue::Role::CommonOptions;
+package MongoDBx::Queue::Role::_CommonOptions;
 
 our $VERSION = '2.001';
 

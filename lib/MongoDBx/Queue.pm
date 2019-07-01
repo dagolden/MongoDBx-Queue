@@ -16,7 +16,7 @@ use MongoDB 2 ();
 use namespace::autoclean;
 
 with (
-    'MongoDBx::Queue::Role::CommonOptions',
+    'MongoDBx::Queue::Role::_CommonOptions',
 );
 
 #--------------------------------------------------------------------------#
@@ -84,12 +84,12 @@ sub _build__implementation {
         collection_name => $self->collection_name,
     };
     if ($self->version == 1) {
-        require MongoDBx::Queue::V1;
-        return MongoDBx::Queue::V1->new($options);
+        require MongoDBx::Queue::_V1;
+        return MongoDBx::Queue::_V1->new($options);
     }
     elsif ($self->version == 2) {
-        require MongoDBx::Queue::V2;
-        return MongoDBx::Queue::V2->new($options);
+        require MongoDBx::Queue::_V2;
+        return MongoDBx::Queue::_V2->new($options);
     }
     else {
         die "Invalid MongoDBx::Queue 'version' (must be 1 or 2)"

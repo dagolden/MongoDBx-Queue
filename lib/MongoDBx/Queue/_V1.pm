@@ -2,7 +2,7 @@ use 5.010;
 use strict;
 use warnings;
 
-package MongoDBx::Queue::V1;
+package MongoDBx::Queue::_V1;
 
 # V1 implementation
 
@@ -21,7 +21,7 @@ my $PRIORITY = '_p';
 with (
     'MooseX::Role::Logger',
     'MooseX::Role::MongoDB' => { -version => 1.000 },
-    'MongoDBx::Queue::Role::CommonOptions',
+    'MongoDBx::Queue::Role::_CommonOptions',
 );
 
 sub _build__mongo_default_database { $_[0]->database_name }
