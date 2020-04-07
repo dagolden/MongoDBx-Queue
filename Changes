@@ -2,6 +2,10 @@ Revision history for MongoDBx-Queue
 
 {{$NEXT}}
 
+    [CHANGED]
+
+    - As an optimization, the 'size' method now gets a faster, estimated count.
+
 2.001     2019-06-30 23:26:26-04:00 America/New_York
 
     [ADDED]

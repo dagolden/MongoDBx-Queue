@@ -111,7 +111,7 @@ sub peek {
 
 sub size {
     my ($self) = @_;
-    return $self->_mongo_collection( $self->collection_name )->count_documents( {} );
+    return $self->_mongo_collection( $self->collection_name )->estimated_document_count();
 }
 
 sub waiting {
